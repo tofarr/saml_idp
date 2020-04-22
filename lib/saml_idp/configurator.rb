@@ -13,8 +13,10 @@ module SamlIdp
     attr_accessor :reference_id_generator
     attr_accessor :attribute_service_location
     attr_accessor :single_service_post_location
+    attr_accessor :single_service_redirect_location
     attr_accessor :single_logout_service_post_location
     attr_accessor :single_logout_service_redirect_location
+    attr_accessor :wants_authn_requests_signed
     attr_accessor :attributes
     attr_accessor :service_provider
     attr_accessor :assertion_consumer_service_hosts
@@ -29,6 +31,7 @@ module SamlIdp
       self.service_provider.finder = ->(_) { Default::SERVICE_PROVIDER }
       self.service_provider.metadata_persister = ->(id, settings) {  }
       self.service_provider.persisted_metadata_getter = ->(id, service_provider) {  }
+      self.wants_authn_requests_signed = false
       self.session_expiry = 0
       self.attributes = {}
     end

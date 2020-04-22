@@ -22,26 +22,30 @@ module SamlIdp
           entityID: entity_id do |entity|
             sign entity
 
-            entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration do |descriptor|
+            entity.IDPSSODescriptor protocolSupportEnumeration: protocol_enumeration, WantAuthnRequestsSigned: wants_authn_requests_signed do |descriptor|
               build_key_descriptor descriptor
-              descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
-                Location: single_logout_service_post_location
-              descriptor.SingleLogoutService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                Location: single_logout_service_redirect_location
+              descriptor.SingleLogoutService(Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+                Location: single_logout_service_post_location) if single_logout_service_post_location.present?
+              descriptor.SingleLogoutService(Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                Location: single_logout_service_redirect_location) if single_logout_service_redirect_location.present?
               build_name_id_formats descriptor
-              descriptor.SingleSignOnService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                Location: single_service_post_location
+              descriptor.SingleSignOnService(Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+                Location: single_service_post_location) if single_service_post_location.present?
+                descriptor.SingleSignOnService(Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                  Location: single_service_redirect_location) if single_service_redirect_location.present?
               build_attribute descriptor
             end
 
-            entity.AttributeAuthorityDescriptor protocolSupportEnumeration: protocol_enumeration do |authority_descriptor|
-              build_key_descriptor authority_descriptor
-              build_organization authority_descriptor
-              build_contact authority_descriptor
-              authority_descriptor.AttributeService Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
-                Location: attribute_service_location
-              build_name_id_formats authority_descriptor
-              build_attribute authority_descriptor
+            unless attribute_service_location.blank?
+              entity.AttributeAuthorityDescriptor protocolSupportEnumeration: protocol_enumeration do |authority_descriptor|
+                build_key_descriptor authority_descriptor
+                build_organization authority_descriptor
+                build_contact authority_descriptor
+                authority_descriptor.AttributeService(Binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+                  Location: attribute_service_location) if attribute_service_location.present?
+                build_name_id_formats authority_descriptor
+                build_attribute authority_descriptor
+              end
             end
 
             build_organization entity
@@ -84,6 +88,7 @@ module SamlIdp
     private :build_attribute
 
     def build_organization(el)
+      return if organization_name.blank? && organization_url.blank?
       el.Organization do |organization|
         organization.OrganizationName organization_name, "xml:lang" => "en"
         organization.OrganizationDisplayName organization_name, "xml:lang" => "en"
@@ -93,6 +98,11 @@ module SamlIdp
     private :build_organization
 
     def build_contact(el)
+      return if technical_contact.company.blank? &&
+        technical_contact.given_name.blank? &&
+        technical_contact.sur_name.blank? &&
+        technical_contact.mail_to_string.blank? &&
+        technical_contact.telephone.blank?
       el.ContactPerson contactType: "technical" do |contact|
         contact.Company         technical_contact.company         if technical_contact.company
         contact.GivenName       technical_contact.given_name      if technical_contact.given_name
@@ -138,7 +148,7 @@ module SamlIdp
     private :raw_algorithm
 
     def x509_certificate
-      SamlIdp.config.x509_certificate
+      configurator.x509_certificate
       .to_s
       .gsub(/-----BEGIN CERTIFICATE-----/,"")
       .gsub(/-----END CERTIFICATE-----/,"")
@@ -151,8 +161,10 @@ module SamlIdp
       organization_url
       attribute_service_location
       single_service_post_location
+      single_service_redirect_location
       single_logout_service_post_location
       single_logout_service_redirect_location
+      wants_authn_requests_signed
       technical_contact
     ].each do |delegatable|
       define_method(delegatable) do

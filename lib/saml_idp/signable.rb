@@ -37,7 +37,7 @@ module SamlIdp
     private :generated_reference_id
 
     def reference_id_generator
-      SamlIdp.config.reference_id_generator
+      self.configurator.reference_id_generator
     end
     private :reference_id_generator
 
