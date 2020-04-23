@@ -10,8 +10,17 @@ module SamlIdp
   require 'saml_idp/version'
   require 'saml_idp/engine' if defined?(::Rails) && Rails::VERSION::MAJOR > 2
 
+  def self.with_config(config)
+    begin
+      Thread.current[:saml_idp_config] = config
+      yield(config)
+    ensure
+      Thread.current[:saml_idp_config] = nil
+    end
+  end
+
   def self.config
-    @config ||= SamlIdp::Configurator.new
+    Thread.current[:saml_idp_config] || @config ||= SamlIdp::Configurator.new
   end
 
   def self.configure
