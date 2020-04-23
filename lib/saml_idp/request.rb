@@ -27,9 +27,8 @@ module SamlIdp
     delegate :xpath, to: :document
     private :xpath
 
-    def initialize(raw_xml = "", config=SamlIdp.config)
+    def initialize(raw_xml = "")
       self.raw_xml = raw_xml
-      self.config = config
     end
 
     def logout_request?
