@@ -35,12 +35,12 @@ module SamlIdp
     end
 
 
-    it "can call service provider finder" do
-      expect(subject.service_provider.finder).to respond_to :call
+    it "can call provider finder" do
+      expect(subject.provider.finder).to respond_to :call
     end
 
-    it "can call service provider metadata persister" do
-      expect(subject.service_provider.metadata_persister).to respond_to :call
+    it "can call provider metadata persister" do
+      expect(subject.provider.metadata_persister).to respond_to :call
     end
 
     it 'has a valid session_expiry' do

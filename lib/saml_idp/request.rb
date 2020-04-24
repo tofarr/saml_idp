@@ -188,7 +188,7 @@ module SamlIdp
     private :signature_namespace
 
     def service_provider_finder
-      config.service_provider.finder
+      config.provider.finder
     end
     private :service_provider_finder
   end

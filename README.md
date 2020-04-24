@@ -184,7 +184,7 @@ CERT
 
   # `identifier` is the entity_id or issuer of the Service Provider,
   # settings is an IncomingMetadata object which has a to_h method that needs to be persisted
-  config.service_provider.metadata_persister = ->(identifier, settings) {
+  config.provider.metadata_persister = ->(identifier, settings) {
     fname = identifier.to_s.gsub(/\/|:/,"_")
     FileUtils.mkdir_p(Rails.root.join('cache', 'saml', 'metadata').to_s)
     File.open Rails.root.join("cache/saml/metadata/#{fname}"), "r+b" do |f|
@@ -195,7 +195,7 @@ CERT
   # `identifier` is the entity_id or issuer of the Service Provider,
   # `service_provider` is a ServiceProvider object. Based on the `identifier` or the
   # `service_provider` you should return the settings.to_h from above
-  config.service_provider.persisted_metadata_getter = ->(identifier, service_provider){
+  config.provider.persisted_metadata_getter = ->(identifier, service_provider){
     fname = identifier.to_s.gsub(/\/|:/,"_")
     FileUtils.mkdir_p(Rails.root.join('cache', 'saml', 'metadata').to_s)
     full_filename = Rails.root.join("cache/saml/metadata/#{fname}")
@@ -207,7 +207,7 @@ CERT
   }
 
   # Find ServiceProvider metadata_url and fingerprint based on our settings
-  config.service_provider.finder = ->(issuer_or_entity_id) do
+  config.provider.finder = ->(issuer_or_entity_id) do
     service_providers[issuer_or_entity_id]
   end
 end

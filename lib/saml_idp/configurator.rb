@@ -19,6 +19,7 @@ module SamlIdp
     attr_accessor :wants_authn_requests_signed
     attr_accessor :attributes
     attr_accessor :service_provider
+    attr_accessor :provider
     attr_accessor :assertion_consumer_service_hosts
     attr_accessor :session_expiry
 
@@ -27,10 +28,10 @@ module SamlIdp
       self.secret_key = Default::SECRET_KEY
       self.algorithm = :sha1
       self.reference_id_generator = ->() { UUID.generate }
-      self.service_provider = OpenStruct.new
-      self.service_provider.finder = ->(_) { Default::SERVICE_PROVIDER }
-      self.service_provider.metadata_persister = ->(id, settings) {  }
-      self.service_provider.persisted_metadata_getter = ->(id, service_provider) {  }
+      self.provider = OpenStruct.new
+      self.provider.finder = ->(_) { Default::SERVICE_PROVIDER }
+      self.provider.metadata_persister = ->(id, settings) {  }
+      self.provider.persisted_metadata_getter = ->(id, service_provider) {  }
       self.wants_authn_requests_signed = false
       self.session_expiry = 0
       self.attributes = {}
