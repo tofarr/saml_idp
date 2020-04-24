@@ -126,7 +126,7 @@ module SamlIdp
 
     def service_provider
       return unless issuer.present?
-      @_service_provider ||= ServiceProvider.new((service_provider_finder[issuer] || {}).merge(identifier: issuer))
+      @_service_provider ||= config.service_provider || ServiceProvider.new((service_provider_finder[issuer] || {}).merge(identifier: issuer))
     end
 
     def issuer
